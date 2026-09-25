@@ -1,5 +1,5 @@
 import React, { useState, KeyboardEvent } from 'react';
-import './App.css';
+import './App.scss';
 
 interface Todo {
   id: number;
