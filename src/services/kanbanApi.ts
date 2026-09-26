@@ -1,5 +1,5 @@
 // API client for the Kanban backend
-import { Todo, TodoStatus } from '../App';
+import { Todo, TodoStatus } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 

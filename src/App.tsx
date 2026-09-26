@@ -1,4 +1,4 @@
-import React, { useState, useCallback, KeyboardEvent, useEffect } from 'react';
+import React, { useState, useCallback, KeyboardEvent, useEffect, useMemo } from 'react';
 import './App.scss';
 import { kanbanAPI } from './services/kanbanApi';
 import { Todo, TodoStatus } from './types';
@@ -99,13 +99,18 @@ const KanbanBoard: React.FC = () => {
     setInputValue(e.target.value);
   }, []);
 
-  const getTodosByStatus = (status: TodoStatus) => {
-    return todos.filter(todo => todo.status === status);
-  };
+  // Memoize todos grouped by status to avoid repeated calls
+  const todosByStatus = useMemo(() => {
+    const map: Record<TodoStatus, Todo[]> = { 'todo': [], 'in-progress': [], 'done': [] };
+    todos.forEach(t => map[t.status].push(t));
+    return map;
+  }, [todos]);
+
+  const getTodosByStatus = (status: TodoStatus) => todosByStatus[status];
 
   return (
     <div className="App">
-      <div className="kanban-container">
+      <div className={`kanban-container${loading ? ' loading' : ''}`}>
         <h1>Kanban Board</h1>
         
         <div className="input-section">
@@ -165,6 +170,7 @@ const KanbanBoard: React.FC = () => {
                               onClick={() => moveTodo(todo.id, 'prev')}
                               className="move-btn"
                               title="Move back"
+                              aria-label="Move task back"
                             >
                               ←
                             </button>
@@ -174,6 +180,7 @@ const KanbanBoard: React.FC = () => {
                               onClick={() => moveTodo(todo.id, 'next')}
                               className="move-btn"
                               title="Move forward"
+                              aria-label="Move task forward"
                             >
                               →
                             </button>
@@ -182,8 +189,9 @@ const KanbanBoard: React.FC = () => {
                             onClick={() => deleteTodo(todo.id)}
                             className="delete-btn"
                             title="Delete"
+                            aria-label="Delete task"
                           >
-                            ×
+                            <span aria-hidden="true">×</span>Delete
                           </button>
                         </div>
                       </div>

@@ -94,7 +94,8 @@ function deleteTodo(id: number): boolean {
 }
 
 function deleteAllTodos(): void {
-  db.exec('DELETE FROM todos');
+  db.exec('DELETE FROM todos;');
+  db.exec("DELETE FROM sqlite_sequence WHERE name='todos';");
 }
 
 // Routes
