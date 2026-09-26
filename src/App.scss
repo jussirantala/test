@@ -1,14 +1,15 @@
 // Variables
 $primary-color: #4a90d9;
-$primary-hover: #357abd;
+$secondary-color: #f5a623;
+$success-color: #7bd693;
 $text-color: #333;
 $text-light: #888;
 $border-color: #ddd;
-$border-light: #eee;
-$background-color: #f5f5f5;
+$background-color: #f0f2f5;
+$background-hover: #f8f9fa;
 $white: white;
-$shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-$delete-color: #ff4444;
+$shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+$shadow-hover: 0 6px 16px rgba(0, 0, 0, 0.12);
 $font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
   'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
 
@@ -32,32 +33,55 @@ code {
   padding: 2rem;
 }
 
-.todo-container {
-  background-color: $white;
-  border-radius: 10px;
-  box-shadow: $shadow;
-  padding: 2rem;
+.kanban-container {
   width: 100%;
-  max-width: 500px;
-
+  max-width: 1200px;
+  
   h1 {
     text-align: center;
     color: $text-color;
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
+    font-size: 2.5rem;
+    font-weight: 600;
+    background: linear-gradient(135deg, $primary-color, $secondary-color);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 }
 
-// Input group
-.input-group {
+// Input section
+.input-section {
   display: flex;
-  margin-bottom: 1.5rem;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: $white;
+  border-radius: 12px;
+  box-shadow: $shadow;
 
   input {
     flex: 1;
-    padding: 0.75rem;
-    border: 1px solid $border-color;
-    border-radius: 4px 0 0 4px;
+    padding: 0.75rem 1rem;
+    border: 2px solid $border-color;
+    border-radius: 8px;
     font-size: 1rem;
+    transition: border-color 0.3s ease;
+
+    &:focus {
+      outline: none;
+      border-color: $primary-color;
+    }
+  }
+
+  select {
+    padding: 0.75rem 1rem;
+    border: 2px solid $border-color;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: $white;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
 
     &:focus {
       outline: none;
@@ -70,60 +94,199 @@ code {
     background-color: $primary-color;
     color: $white;
     border: none;
-    border-radius: 0 4px 4px 0;
-    cursor: pointer;
+    border-radius: 8px;
     font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
 
     &:hover {
-      background-color: $primary-hover;
+      background-color: darken($primary-color, 10%);
+      transform: translateY(-2px);
     }
   }
 }
 
-// Todo list
-.todo-list {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
+// Board layout
+.board {
+  display: flex;
+  gap: 1.5rem;
+  overflow-x: auto;
+  padding-bottom: 1rem;
 }
 
-.todo-item {
+// Column styles
+.column {
+  flex: 1;
+  min-width: 300px;
+  background: $white;
+  border-radius: 12px;
+  box-shadow: $shadow;
+  border-top: 4px solid;
+  transition: box-shadow 0.3s ease;
+
+  &:hover {
+    box-shadow: $shadow-hover;
+  }
+}
+
+.column-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding: 0.75rem;
-  border-bottom: 1px solid $border-light;
-  transition: background-color 0.2s;
+  align-items: center;
+  padding: 1rem;
+  color: $white;
+  border-radius: 12px 12px 0 0;
+
+  h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+
+  .count {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+  }
+}
+
+.column-content {
+  padding: 1rem;
+  min-height: 200px;
+}
+
+.empty-column {
+  text-align: center;
+  color: $text-light;
+  padding: 2rem 0;
+  font-style: italic;
+}
+
+// Card styles
+.card {
+  background: $background-hover;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+  border-left: 3px solid;
+  transition: all 0.3s ease;
 
   &:last-child {
-    border-bottom: none;
+    margin-bottom: 0;
   }
 
   &:hover {
-    background-color: #f9f9f9;
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
+}
 
-  span {
+.card-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+
+  p {
+    margin: 0;
     flex: 1;
-    cursor: pointer;
+    word-break: break-word;
   }
+}
 
-  &.completed span {
+.card-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: 0.5rem;
+}
+
+.move-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: $text-light;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: $primary-color;
+    background: rgba($primary-color, 0.1);
+  }
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: $text-light;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: #ff4444;
+    background: rgba(#ff4444, 0.1);
+  }
+}
+
+// Status-specific colors
+.todo {
+  border-left-color: $primary-color;
+}
+
+.in-progress {
+  border-left-color: $secondary-color;
+}
+
+.done {
+  border-left-color: $success-color;
+  
+  p {
     text-decoration: line-through;
     color: $text-light;
   }
 }
 
-// Delete button
-.delete-btn {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  color: #999;
-  cursor: pointer;
-  padding: 0 0.5rem;
-
-  &:hover {
-    color: $delete-color;
+// Error message
+.error-message {
+  background: #fff3f3;
+  border: 1px solid #ffcccc;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  
+  p {
+    margin: 0 0 0.5rem 0;
+    color: #d32f2f;
+  }
+  
+  button {
+    padding: 0.5rem 1rem;
+    background-color: #d32f2f;
+    color: $white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    
+    &:hover {
+      background-color: #b71c1c;
+    }
   }
 }
+
+// Loading state
+.kanban-container {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+  
+  &.loading {
+    opacity: 0.7;
+  }
+}
+

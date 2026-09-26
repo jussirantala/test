@@ -1,0 +1,38 @@
+# Docker Compose for Kanban Board App
+
+services:
+  # ===== Frontend (Vite + React) =====
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - kanban-network
+    restart: unless-stopped
+
+  # ===== Backend (Express + SQLite) =====
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    ports:
+      - "5000:5000"
+    volumes:
+      - sqlite-data:/app/data
+    networks:
+      - kanban-network
+    restart: unless-stopped
+
+# Volumes
+volumes:
+  sqlite-data:
+    driver: local
+
+# Networks
+networks:
+  kanban-network:
+    driver: bridge

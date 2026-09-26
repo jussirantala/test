@@ -1,0 +1,37 @@
+# ===== Stage 1: Build =====
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Install dependencies first (leveraging cache)
+COPY package.json package-lock.json* ./
+RUN npm ci
+
+# Copy source files
+COPY tsconfig.json ./
+COPY vite.config.ts ./
+COPY vite-env.d.ts ./
+COPY index.html ./
+COPY public/ ./public/
+COPY src/ ./src/
+
+# Build the frontend
+RUN npm run build
+
+# ===== Stage 2: Serve =====
+FROM nginx:alpine
+
+# Remove default nginx config
+RUN rm /etc/nginx/conf.d/default.conf
+
+# Copy our nginx config
+COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copy built assets from builder stage
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Expose port
+EXPOSE 80
+
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]
