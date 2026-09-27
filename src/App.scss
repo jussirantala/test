@@ -1,31 +1,60 @@
-// Variables
-$primary-color: #4a90d9;
-$secondary-color: #f5a623;
-$success-color: #7bd693;
-$text-color: #333;
-$text-light: #888;
-$border-color: #ddd;
-$background-color: #f0f2f5;
-$background-hover: #f8f9fa;
-$white: white;
-$shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-$shadow-hover: 0 6px 16px rgba(0, 0, 0, 0.12);
+// ─── Dark Theme Variables ─────────────────────────────────────────────────
+$bg-primary:    #0f0f1a;
+$bg-secondary:  #1a1a2e;
+$bg-card:       #16213e;
+$bg-card-hover: #1c2a4a;
+$bg-input:      #1a1a2e;
+$border-color:  #2a2a4a;
+$border-glow:   rgba(74, 144, 217, 0.3);
+
+$primary:       #4a90d9;
+$primary-glow:  rgba(74, 144, 217, 0.15);
+$secondary:     #f5a623;
+$secondary-glow: rgba(245, 166, 35, 0.15);
+$success:       #7bd693;
+$success-glow:  rgba(123, 214, 147, 0.15);
+
+$danger:        #ff6b6b;
+$danger-glow:   rgba(255, 107, 107, 0.15);
+
+$text-primary:  #e8e8f0;
+$text-secondary:#8888a8;
+$text-muted:    #5a5a7a;
+
+$white:         #ffffff;
+$shadow:        0 8px 32px rgba(0, 0, 0, 0.3);
+$shadow-hover:  0 12px 40px rgba(0, 0, 0, 0.45);
+$inner-shadow:  inset 0 2px 8px rgba(0, 0, 0, 0.2);
+
 $font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
   'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
 
+$radius:      16px;
+$radius-sm:   10px;
+$transition:  all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+// ─── Reset & Body ─────────────────────────────────────────────────────────
 body {
   margin: 0;
-  font-family: $font-family;
+  font-family: 'Inter', $font-family;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: $background-color;
+  background: $bg-primary;
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(74, 144, 217, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(123, 214, 147, 0.06) 0%, transparent 60%);
+  color: $text-primary;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+  font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+  background: $bg-card;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
 }
 
-// Main app container
+// ─── Main Container ───────────────────────────────────────────────────────
 .App {
   display: flex;
   justify-content: center;
@@ -36,141 +65,300 @@ code {
 .kanban-container {
   width: 100%;
   max-width: 1200px;
-  
-  h1 {
-    text-align: center;
-    color: $text-color;
-    margin-bottom: 2rem;
-    font-size: 2.5rem;
-    font-weight: 600;
-    background: linear-gradient(135deg, $primary-color, $secondary-color);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+
+  &.loading {
+    opacity: 0.6;
+    filter: blur(1px);
   }
 }
 
-// Input section
+// ─── Title ────────────────────────────────────────────────────────────────
+.kanban-container h1 {
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, $primary 0%, $secondary 50%, $success 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative;
+
+  &::after {
+    content: '';
+    display: block;
+    width: 80px;
+    height: 4px;
+    margin: 0.75rem auto 0;
+    border-radius: 2px;
+    background: linear-gradient(90deg, $primary, $secondary, $success);
+  }
+}
+
+// ─── Input Section ────────────────────────────────────────────────────────
 .input-section {
   display: flex;
   gap: 1rem;
   margin-bottom: 2rem;
   padding: 1.5rem;
-  background: $white;
-  border-radius: 12px;
+  background: $bg-secondary;
+  border: 1px solid $border-color;
+  border-radius: $radius;
   box-shadow: $shadow;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, $primary, $secondary, $success);
+  }
 
   input {
     flex: 1;
-    padding: 0.75rem 1rem;
+    padding: 0.85rem 1.25rem;
     border: 2px solid $border-color;
-    border-radius: 8px;
+    border-radius: $radius-sm;
     font-size: 1rem;
-    transition: border-color 0.3s ease;
+    font-family: inherit;
+    color: $text-primary;
+    background: $bg-input;
+    transition: $transition;
+    box-shadow: $inner-shadow;
+
+    &::placeholder {
+      color: $text-muted;
+    }
 
     &:focus {
       outline: none;
-      border-color: $primary-color;
+      border-color: $primary;
+      box-shadow: $inner-shadow, 0 0 0 3px $primary-glow;
     }
   }
 
   select {
-    padding: 0.75rem 1rem;
+    padding: 0.85rem 1.25rem;
     border: 2px solid $border-color;
-    border-radius: 8px;
+    border-radius: $radius-sm;
     font-size: 1rem;
-    background: $white;
+    font-family: inherit;
+    color: $text-primary;
+    background: $bg-input;
     cursor: pointer;
-    transition: border-color 0.3s ease;
+    transition: $transition;
+    box-shadow: $inner-shadow;
 
     &:focus {
       outline: none;
-      border-color: $primary-color;
+      border-color: $primary;
+      box-shadow: $inner-shadow, 0 0 0 3px $primary-glow;
+    }
+
+    option {
+      background: $bg-secondary;
+      color: $text-primary;
     }
   }
 
   button {
-    padding: 0.75rem 1.5rem;
-    background-color: $primary-color;
+    padding: 0.85rem 2rem;
+    background: linear-gradient(135deg, $primary, darken($primary, 8%));
     color: $white;
     border: none;
-    border-radius: 8px;
+    border-radius: $radius-sm;
     font-size: 1rem;
-    font-weight: 500;
+    font-weight: 600;
+    font-family: inherit;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: $transition;
+    box-shadow: 0 4px 15px rgba($primary, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
 
     &:hover {
-      background-color: darken($primary-color, 10%);
       transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba($primary, 0.4);
+      background: linear-gradient(135deg, lighten($primary, 5%), $primary);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
     }
   }
 }
 
-// Board layout
+// ─── Error Message ────────────────────────────────────────────────────────
+.error-message {
+  background: rgba(255, 107, 107, 0.08);
+  border: 1px solid rgba(255, 107, 107, 0.25);
+  border-radius: $radius-sm;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  backdrop-filter: blur(10px);
+
+  p {
+    margin: 0 0 0.75rem;
+    color: $danger;
+    font-weight: 500;
+  }
+
+  button {
+    padding: 0.5rem 1.25rem;
+    background: $danger;
+    color: $white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: $transition;
+
+    &:hover {
+      background: darken($danger, 8%);
+      transform: translateY(-1px);
+    }
+  }
+}
+
+// ─── Board Layout ─────────────────────────────────────────────────────────
 .board {
   display: flex;
   gap: 1.5rem;
   overflow-x: auto;
   padding-bottom: 1rem;
-}
+  scroll-snap-type: x mandatory;
 
-// Column styles
-.column {
-  flex: 1;
-  min-width: 300px;
-  background: $white;
-  border-radius: 12px;
-  box-shadow: $shadow;
-  border-top: 4px solid;
-  transition: box-shadow 0.3s ease;
+  &::-webkit-scrollbar {
+    height: 6px;
+  }
 
-  &:hover {
-    box-shadow: $shadow-hover;
+  &::-webkit-scrollbar-track {
+    background: $bg-primary;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $border-color;
+    border-radius: 3px;
+
+    &:hover {
+      background: $text-secondary;
+    }
   }
 }
 
+// ─── Columns ──────────────────────────────────────────────────────────────
+.column {
+  flex: 1;
+  min-width: 320px;
+  max-width: 400px;
+  background: $bg-secondary;
+  border-radius: $radius;
+  box-shadow: $shadow;
+  border-top: 4px solid;
+  border-top-color: var(--col-color, $primary);
+  transition: $transition;
+  display: flex;
+  flex-direction: column;
+  scroll-snap-align: start;
+
+  &:hover {
+    box-shadow: $shadow-hover;
+    transform: translateY(-2px);
+  }
+}
+
+// ─── Column Header ────────────────────────────────────────────────────────
 .column-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
+  padding: 1rem 1.25rem;
   color: $white;
-  border-radius: 12px 12px 0 0;
+  border-radius: $radius $radius 0 0;
+  position: relative;
 
   h2 {
     margin: 0;
     font-size: 1.2rem;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: -0.01em;
   }
 
   .count {
-    background: rgba(255, 255, 255, 0.2);
-    padding: 0.25rem 0.75rem;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    padding: 0.3rem 0.85rem;
     border-radius: 20px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
+}
+
+// Column color themes for headers
+.column[data-col="todo"] .column-header {
+  background: linear-gradient(135deg, rgba($primary, 0.85), rgba($primary, 0.5));
+}
+
+.column[data-col="in-progress"] .column-header {
+  background: linear-gradient(135deg, rgba($secondary, 0.85), rgba($secondary, 0.5));
+}
+
+.column[data-col="done"] .column-header {
+  background: linear-gradient(135deg, rgba($success, 0.85), rgba($success, 0.5));
 }
 
 .column-content {
   padding: 1rem;
-  min-height: 200px;
+  min-height: 180px;
+  flex: 1;
 }
 
+// ─── Empty State ──────────────────────────────────────────────────────────
 .empty-column {
   text-align: center;
-  color: $text-light;
-  padding: 2rem 0;
+  color: $text-muted;
+  padding: 2.5rem 0;
   font-style: italic;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &::before {
+    content: '📋';
+    display: block;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-style: normal;
+  }
 }
 
-// Card styles
+// ─── Cards ────────────────────────────────────────────────────────────────
 .card {
-  background: $background-hover;
-  border-radius: 8px;
+  background: $bg-card;
+  border-radius: $radius-sm;
   margin-bottom: 0.75rem;
-  border-left: 3px solid;
-  transition: all 0.3s ease;
+  border-left: 4px solid;
+  border-top-color: transparent;
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+  transition: $transition;
+  overflow: hidden;
 
   &:last-child {
     margin-bottom: 0;
@@ -178,115 +366,161 @@ code {
 
   &:hover {
     transform: translateX(4px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    background: $bg-card-hover;
   }
 }
+
+// Status-specific left borders
+.card[data-status="todo"]    { border-left-color: $primary; }
+.card[data-status="in-progress"] { border-left-color: $secondary; }
+.card[data-status="done"]   { border-left-color: $success; }
 
 .card-body {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem;
-
-  p {
-    margin: 0;
-    flex: 1;
-    word-break: break-word;
-  }
+  align-items: flex-start;
+  padding: 0.85rem 1rem;
+  gap: 0.75rem;
 }
 
+.card-body p {
+  margin: 0;
+  flex: 1;
+  word-break: break-word;
+  line-height: 1.5;
+  color: $text-primary;
+}
+
+// ─── Card Actions ─────────────────────────────────────────────────────────
 .card-actions {
   display: flex;
-  gap: 0.5rem;
-  margin-left: 0.5rem;
+  gap: 0.35rem;
+  flex-shrink: 0;
+  align-items: center;
 }
 
 .move-btn {
   background: none;
-  border: none;
-  font-size: 1.2rem;
-  color: $text-light;
+  border: 1px solid $border-color;
+  font-size: 1.1rem;
+  color: $text-secondary;
   cursor: pointer;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  transition: all 0.2s ease;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  transition: $transition;
+  line-height: 1;
 
   &:hover {
-    color: $primary-color;
-    background: rgba($primary-color, 0.1);
+    color: $primary;
+    border-color: $primary;
+    background: $primary-glow;
+    transform: scale(1.1);
+  }
+
+  &:active {
+    transform: scale(0.95);
   }
 }
 
 .delete-btn {
   background: none;
-  border: none;
-  font-size: 1.5rem;
-  color: $text-light;
+  border: 1px solid transparent;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: $text-secondary;
   cursor: pointer;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  transition: all 0.2s ease;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  transition: $transition;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 
   &:hover {
-    color: #ff4444;
-    background: rgba(#ff4444, 0.1);
+    color: $danger;
+    background: $danger-glow;
+    border-color: rgba($danger, 0.3);
+  }
+
+  span {
+    font-size: 1.2rem;
+    line-height: 1;
   }
 }
 
-// Status-specific colors
-.todo {
-  border-left-color: $primary-color;
+// ─── Status-specific card body ────────────────────────────────────────────
+.card[data-status="done"] p {
+  color: $text-secondary;
 }
 
-.in-progress {
-  border-left-color: $secondary-color;
+.card[data-status="done"] .card-body {
+  background: rgba(123, 214, 147, 0.03);
 }
 
-.done {
-  border-left-color: $success-color;
-  
-  p {
-    text-decoration: line-through;
-    color: $text-light;
+// ─── Responsive ───────────────────────────────────────────────────────────
+@media (max-width: 768px) {
+  .App {
+    padding: 1rem;
+  }
+
+  .kanban-container h1 {
+    font-size: 2rem;
+  }
+
+  .board {
+    flex-direction: column;
+  }
+
+  .column {
+    min-width: 100%;
+    max-width: 100%;
+  }
+
+  .input-section {
+    flex-wrap: wrap;
+  }
+
+  .input-section input {
+    width: 100%;
+    order: 1;
+  }
+
+  .input-section select {
+    order: 2;
+    flex: 1;
+    min-width: 140px;
+  }
+
+  .input-section button {
+    order: 3;
+    width: 100%;
   }
 }
 
-// Error message
-.error-message {
-  background: #fff3f3;
-  border: 1px solid #ffcccc;
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1.5rem;
-  text-align: center;
-  
-  p {
-    margin: 0 0 0.5rem 0;
-    color: #d32f2f;
+// ─── Animations ───────────────────────────────────────────────────────────
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
   }
-  
-  button {
-    padding: 0.5rem 1rem;
-    background-color: #d32f2f;
-    color: $white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    
-    &:hover {
-      background-color: #b71c1c;
-    }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-// Loading state
-.kanban-container {
-  opacity: 1;
-  transition: opacity 0.3s ease;
-  
-  &.loading {
-    opacity: 0.7;
-  }
+.card {
+  animation: fadeIn 0.3s ease forwards;
 }
 
+.column {
+  animation: fadeIn 0.4s ease forwards;
+}
+
+// Staggered card animations
+.card:nth-child(1) { animation-delay: 0.05s; }
+.card:nth-child(2) { animation-delay: 0.1s; }
+.card:nth-child(3) { animation-delay: 0.15s; }
+.card:nth-child(4) { animation-delay: 0.2s; }
+.card:nth-child(5) { animation-delay: 0.25s; }

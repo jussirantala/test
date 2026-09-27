@@ -147,8 +147,8 @@ const KanbanBoard: React.FC = () => {
 
         <div className="board">
           {COLUMNS.map(column => (
-            <div key={column.id} className="column" style={{ borderColor: column.color }}>
-              <div className="column-header" style={{ backgroundColor: column.color }}>
+            <div key={column.id} className="column" style={{ borderColor: column.color }} data-col={column.id}>
+              <div className="column-header">
                 <h2>{column.title}</h2>
                 <span className="count">{getTodosByStatus(column.id).length}</span>
               </div>
@@ -160,7 +160,7 @@ const KanbanBoard: React.FC = () => {
                     <div
                       key={todo.id}
                       className={`card ${todo.status}`}
-                      style={{ borderTopColor: column.color }}
+                      data-status={todo.status}
                     >
                       <div className="card-body">
                         <p>{todo.text}</p>
