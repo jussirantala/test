@@ -281,6 +281,15 @@ code {
   }
 }
 
+.drag-over {
+  background: rgba(74, 144, 217, 0.06);
+}
+
+.card.dragging {
+  opacity: 0.5;
+  transform: scale(0.98);
+}
+
 // ─── Column Header ────────────────────────────────────────────────────────
 .column-header {
   display: flex;
@@ -390,6 +399,25 @@ code {
   word-break: break-word;
   line-height: 1.5;
   color: $text-primary;
+  cursor: text;
+  min-height: 1.5em;
+}
+
+.card-body p[contenteditable="true"] {
+  cursor: pointer;
+}
+
+.card-body input.edit-input {
+  flex: 1;
+  padding: 0.25rem 0.5rem;
+  border: 2px solid $primary;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  color: $text-primary;
+  background: $bg-card-hover;
+  outline: none;
+  box-shadow: $inner-shadow, 0 0 0 3px $primary-glow;
 }
 
 // ─── Card Actions ─────────────────────────────────────────────────────────
@@ -524,3 +552,9 @@ code {
 .card:nth-child(3) { animation-delay: 0.15s; }
 .card:nth-child(4) { animation-delay: 0.2s; }
 .card:nth-child(5) { animation-delay: 0.25s; }
+.card:nth-child(6) { animation-delay: 0.3s; }
+.card:nth-child(7) { animation-delay: 0.35s; }
+.card:nth-child(8) { animation-delay: 0.4s; }
+.card:nth-child(9) { animation-delay: 0.45s; }
+.card:nth-child(10) { animation-delay: 0.5s; }
+.card:nth-child(n + 11) { animation-delay: 0.55s; }

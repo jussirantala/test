@@ -1,4 +1,4 @@
-import React, { useState, useCallback, KeyboardEvent, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, KeyboardEvent, useEffect, useMemo, useRef } from 'react';
 import './App.scss';
 import { kanbanAPI } from './services/kanbanApi';
 import { Todo, TodoStatus } from './types';
@@ -21,6 +21,10 @@ const KanbanBoard: React.FC = () => {
   const [selectedColumn, setSelectedColumn] = useState<TodoStatus>('todo');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editText, setEditText] = useState<string>('');
+  const dragItem = useRef<number | null>(null);
+  const dragOverItem = useRef<number | null>(null);
 
   // Fetch todos from API on mount
   useEffect(() => {
@@ -99,6 +103,64 @@ const KanbanBoard: React.FC = () => {
     setInputValue(e.target.value);
   }, []);
 
+  // ── Inline card editing ─────────────────────────────────────────────────
+  const startEdit = useCallback((todo: Todo) => {
+    setEditingId(todo.id);
+    setEditText(todo.text);
+  }, []);
+
+  const saveEdit = useCallback(async (id: number) => {
+    if (editText.trim() === '') return;
+    try {
+      setError(null);
+      await kanbanAPI.updateTodo(id, { text: editText.trim() });
+      setTodos(prevTodos => prevTodos.map(t =>
+        t.id === id ? { ...t, text: editText.trim() } : t
+      ));
+      setEditingId(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update task');
+    }
+  }, [editText]);
+
+  const cancelEdit = useCallback(() => {
+    setEditingId(null);
+    setEditText('');
+  }, []);
+
+  const handleEditKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') saveEdit(editingId!);
+    if (e.key === 'Escape') cancelEdit();
+  }, [editingId, saveEdit, cancelEdit]);
+
+  // ── Drag and drop ───────────────────────────────────────────────────────
+  const handleDragStart = useCallback((e: React.DragEvent<HTMLDivElement>, todoId: number) => {
+    dragItem.current = todoId;
+    e.dataTransfer.effectAllowed = 'move';
+  }, []);
+
+  const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>, todoId: number) => {
+    dragOverItem.current = todoId;
+  }, []);
+
+  const handleDragEnd = useCallback(async () => {
+    const fromId = dragItem.current;
+    const toId = dragOverItem.current;
+    dragItem.current = null;
+    dragOverItem.current = null;
+
+    if (fromId === null || toId === null || fromId === toId) return;
+
+    const fromTodo = todos.find(t => t.id === fromId);
+    const toTodo = todos.find(t => t.id === toId);
+    if (!fromTodo || !toTodo || fromTodo.status === toTodo.status) return;
+
+    await kanbanAPI.moveTodo(fromId, toTodo.status);
+    setTodos(prevTodos => prevTodos.map(t =>
+      t.id === fromId ? { ...t, status: toTodo.status } : t
+    ));
+  }, [todos]);
+
   // Memoize todos grouped by status to avoid repeated calls
   const todosByStatus = useMemo(() => {
     const map: Record<TodoStatus, Todo[]> = { 'todo': [], 'in-progress': [], 'done': [] };
@@ -106,7 +168,7 @@ const KanbanBoard: React.FC = () => {
     return map;
   }, [todos]);
 
-  const getTodosByStatus = (status: TodoStatus) => todosByStatus[status];
+  const getTodosByStatus = useCallback((status: TodoStatus) => todosByStatus[status], [todosByStatus]);
 
   return (
     <div className="App">
@@ -118,7 +180,7 @@ const KanbanBoard: React.FC = () => {
             type="text"
             value={inputValue}
             onChange={handleInputChange}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyPress}
             placeholder="Add a new task..."
             disabled={loading}
           />
@@ -147,7 +209,7 @@ const KanbanBoard: React.FC = () => {
 
         <div className="board">
           {COLUMNS.map(column => (
-            <div key={column.id} className="column" style={{ borderColor: column.color }} data-col={column.id}>
+            <div key={column.id} className="column" style={{ '--col-color': column.color } as React.CSSProperties} data-col={column.id}>
               <div className="column-header">
                 <h2>{column.title}</h2>
                 <span className="count">{getTodosByStatus(column.id).length}</span>
@@ -161,38 +223,68 @@ const KanbanBoard: React.FC = () => {
                       key={todo.id}
                       className={`card ${todo.status}`}
                       data-status={todo.status}
+                      draggable
+                      onDragStart={e => handleDragStart(e, todo.id)}
+                      onDragEnter={e => handleDragEnter(e, todo.id)}
+                      onDragOver={e => e.preventDefault()}
+                      onDragEnd={handleDragEnd}
                     >
                       <div className="card-body">
-                        <p>{todo.text}</p>
+                        {editingId === todo.id ? (
+                          <input
+                            type="text"
+                            value={editText}
+                            onChange={e => setEditText(e.target.value)}
+                            onKeyDown={handleEditKeyDown}
+                            onBlur={() => saveEdit(todo.id)}
+                            autoFocus
+                          />
+                        ) : (
+                          <p onDoubleClick={() => startEdit(todo)}>{todo.text}</p>
+                        )}
                         <div className="card-actions">
-                          {todo.status !== 'todo' && (
+                          {editingId !== todo.id && (
+                            <>
+                              {todo.status !== 'todo' && (
+                                <button
+                                  onClick={() => moveTodo(todo.id, 'prev')}
+                                  className="move-btn"
+                                  title="Move back"
+                                  aria-label="Move task back"
+                                >
+                                  ←
+                                </button>
+                              )}
+                              {todo.status !== 'done' && (
+                                <button
+                                  onClick={() => moveTodo(todo.id, 'next')}
+                                  className="move-btn"
+                                  title="Move forward"
+                                  aria-label="Move task forward"
+                                >
+                                  →
+                                </button>
+                              )}
+                              <button
+                                onClick={() => deleteTodo(todo.id)}
+                                className="delete-btn"
+                                title="Delete"
+                                aria-label="Delete task"
+                              >
+                                <span aria-hidden="true">×</span>Delete
+                              </button>
+                            </>
+                          )}
+                          {editingId === todo.id && (
                             <button
-                              onClick={() => moveTodo(todo.id, 'prev')}
+                              onClick={() => saveEdit(todo.id)}
                               className="move-btn"
-                              title="Move back"
-                              aria-label="Move task back"
+                              title="Save"
+                              aria-label="Save task"
                             >
-                              ←
+                              ✓
                             </button>
                           )}
-                          {todo.status !== 'done' && (
-                            <button
-                              onClick={() => moveTodo(todo.id, 'next')}
-                              className="move-btn"
-                              title="Move forward"
-                              aria-label="Move task forward"
-                            >
-                              →
-                            </button>
-                          )}
-                          <button
-                            onClick={() => deleteTodo(todo.id)}
-                            className="delete-btn"
-                            title="Delete"
-                            aria-label="Delete task"
-                          >
-                            <span aria-hidden="true">×</span>Delete
-                          </button>
                         </div>
                       </div>
                     </div>
